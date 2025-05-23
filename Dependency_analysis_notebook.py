@@ -8,7 +8,7 @@
 # Here we pull in all standard and third-party libraries used across the notebook.
 # 
 
-# In[1]:
+# In[123]:
 
 
 import os
@@ -36,7 +36,7 @@ import copy
 # 
 # Initialize caches, default parameters, and any constants.
 
-# In[2]:
+# In[124]:
 
 
 # The repository to analyze
@@ -44,7 +44,6 @@ import sys
 
 
 repo_name = sys.argv[1]
-
 repo_url = "https://github.com/" + repo_name
 destination_path = "./" + repo_name
 repo_path = repo_name
@@ -72,7 +71,7 @@ cached_versions = defaultdict(dict)
 # 
 # ### 2.1 Compute Metrics per Commit
 
-# In[ ]:
+# In[125]:
 
 
 def compute_per_commit_file_metrics(json_path, weeks=13):
@@ -85,18 +84,14 @@ def compute_per_commit_file_metrics(json_path, weeks=13):
         df['commit_date'].notna()
     ].rename(columns={'filename': 'file_path', 'commit': 'commit_hash'})
 
-    # <<-- Neu: Numeric Casting
     for col in ['latency', 'proj_version_lag', 'criticality']:
         df[col] = pd.to_numeric(df[col], errors='coerce')
-    # Ende Casting -->>
 
-    # 2) Quartals-Fenster etc. wie gehabt
     start = df['commit_date'].min().normalize()
     end   = df['commit_date'].max().normalize() + pd.Timedelta(weeks=weeks)
     bins  = pd.date_range(start, end, freq=f'{weeks}W')
     df['interval_start'] = pd.cut(df['commit_date'], bins=bins, labels=bins[:-1])
 
-    # 3a) proj_update_frequency pro Intervall
     unique_per_quarter = (
         df
         .groupby('interval_start', observed=False)['dependency']
@@ -104,7 +99,6 @@ def compute_per_commit_file_metrics(json_path, weeks=13):
         .reset_index(name='proj_update_frequency')
     )
 
-    # 3b) proj_mtbu pro Dependency
     dep_intervals = (
         df
         .sort_values(['dependency', 'commit_date'])
@@ -120,7 +114,6 @@ def compute_per_commit_file_metrics(json_path, weeks=13):
     )
     avg_interval['avg_update_interval_weeks'] = avg_interval['avg_update_interval_days'] / 7
 
-    # 4) Merge zurück
     df = (
         df
         .merge(unique_per_quarter, on='interval_start', how='left')
@@ -129,7 +122,6 @@ def compute_per_commit_file_metrics(json_path, weeks=13):
 
 
 
-    # 5) Gruppieren und Aggregieren
     agg = (
         df
         .groupby(['commit_hash','commit_date','file_path'])
@@ -166,7 +158,7 @@ def compute_per_commit_file_metrics(json_path, weeks=13):
 # 
 # Three parallel routines to walk each commit and process changed files by type:
 
-# In[4]:
+# In[126]:
 
 
 def process_commits_pom(repo, commits_with_changes):
@@ -180,7 +172,7 @@ def process_commits_pom(repo, commits_with_changes):
     return dependencies_over_time
 
 
-# In[5]:
+# In[127]:
 
 
 def process_commits_gradle(repo, commits_with_changes):
@@ -199,7 +191,7 @@ def process_commits_gradle(repo, commits_with_changes):
 
 
 
-# In[6]:
+# In[128]:
 
 
 def process_commits_py_js(repo_path, commits_with_files):
@@ -220,7 +212,7 @@ def process_commits_py_js(repo_path, commits_with_files):
 # 
 # A small helper to dump the combined dependency snapshot to disk:
 
-# In[7]:
+# In[129]:
 
 
 def save_merged_data(merged_data: Dict, output_file: str):
@@ -233,12 +225,12 @@ def save_merged_data(merged_data: Dict, output_file: str):
 # Functions to locate all POMs, Gradle files, `requirements.txt`, `package.json`, etc.:
 # 
 
-# In[8]:
+# In[130]:
 
 
 def find_all_files(repo_path):
     found_files = []
-    for root, dirs, file_list in os.walk(repo_path):  # renamed 'files' to 'file_list'
+    for root, dirs, file_list in os.walk(repo_path):
         for file in file_list:
             if file == "pom.xml" or file == "requirements.txt" or file == "package.json" or file == "setup.py" or file == "pyproject.toml":
                 full_path = os.path.join(root, file)
@@ -246,7 +238,7 @@ def find_all_files(repo_path):
     return found_files
 
 
-# In[9]:
+# In[131]:
 
 
 def find_all_gradle_files(repo_path):
@@ -270,22 +262,12 @@ def find_all_gradle_files(repo_path):
                     break
     return gradle_files
 
-def find_commits_with_changes(repo_path, file_paths):
-    repo = Repo(repo_path)
-    commits_with_changes = {}
 
-    for file_path in file_paths:
-        rel_path = os.path.relpath(file_path, repo_path)
-        commits = list(repo.iter_commits(paths=rel_path))
-        
-        commits_with_changes[rel_path] = [commit.hexsha for commit in commits]
-    
-    return commits_with_changes
 # ### 2.5 Commit History Helpers
 # 
 # Load commits and filter to those touching our target files:
 
-# In[10]:
+# In[132]:
 
 
 def get_all_relevant_commits(repo_path: str, file_paths: List[str]) -> Dict[str, List[str]]:
@@ -309,27 +291,24 @@ def get_all_relevant_commits(repo_path: str, file_paths: List[str]) -> Dict[str,
         for line in lines:
             stripped_line = line.strip()
             
-            if len(stripped_line) == 40 and all(c in '0123456789abcdef' for c in stripped_line):  # Check if it looks like a SHA-1 hash
+            if len(stripped_line) == 40 and all(c in '0123456789abcdef' for c in stripped_line):  
                 current_commit = stripped_line
                 if current_commit not in commits_with_changes:
-                    commits_with_changes[current_commit] = set()  # Using set to avoid duplicates
+                    commits_with_changes[current_commit] = set() 
             elif current_commit:
                 modified_file = stripped_line
-                if modified_file:  # Ensure we don't add empty lines
+                if modified_file:  
                     commits_with_changes[current_commit].add(modified_file)
 
-    # Convert commits to a sorted list based on commit date
     commit_objects = []
     for commit_hash in commits_with_changes.keys():
         try:
             commit_obj = repo.commit(commit_hash)
             commit_objects.append((commit_obj, commit_hash))
         except BadName:
-            print(f"Skipping invalid commit hash: {commit_hash}")  # Warn if a bad commit hash is found
-
+            print(f"Skipping invalid commit hash: {commit_hash}")  
     sorted_commits = sorted(commit_objects, key=lambda x: x[0].committed_date)
     
-    # Creating a sorted dictionary of commits with their modified files
     sorted_commits_with_changes = {
         commit_hash: list(commits_with_changes[commit_hash]) for _, commit_hash in sorted_commits
         }
@@ -347,14 +326,14 @@ def get_all_relevant_commits(repo_path: str, file_paths: List[str]) -> Dict[str,
 # 
 # Extract `<dependency>` entries (groupId\:artifactId\:version):
 
-# In[11]:
+# In[133]:
 
 
 def parse_pom_xml(content: str, file_path: str, properties: Dict[str, str] = None) -> Dict[str, str]:
     if properties is None:
         properties = {}
     else:
-        properties = properties.copy()  # Avoid side effects
+        properties = properties.copy()
 
     dependencies = {}
 
@@ -411,24 +390,18 @@ def parse_pom_xml(content: str, file_path: str, properties: Dict[str, str] = Non
                         dependencies[dep_key] = resolved_version
                     else:
                         dependencies[dep_key] = version_text
-                #else:
-                    #dependencies[dep_key] = "UNSPECIFIED"
-
     except ET.ParseError as e:
         print(f"XML parsing error: {e}")
-
     return dependencies
 
 
-
-
-# In[12]:
+# In[134]:
 
 
 def resolve_cached(prop_name, visited=None):
     matches = re.findall(r"\$\{([^}]+)\}", prop_name)
     if not matches:
-        return properties_cache.get(prop_name)  # nothing to resolve, return as is
+        return properties_cache.get(prop_name) 
 
     resolved = prop_name
     for match in matches:
@@ -441,7 +414,7 @@ def resolve_cached(prop_name, visited=None):
 
 
 
-# In[13]:
+# In[135]:
 
 
 def resolve_from_parent(prop_name: str, file_path: str, properties: Dict[str, str]) -> str:
@@ -471,21 +444,20 @@ def resolve_from_parent(prop_name: str, file_path: str, properties: Dict[str, st
     final_path = Path(*stack)
     parent_file = str(final_path).replace("\\", "/")
     if parent_file not in file_cache:
-        #print(f"[DEBUG] Skipping missing file: {parent_file}")
         return "UNRESOLVED"
     content = file_cache[parent_file]
     parent_prop_value = get_all_properties(content, prop_name, final_path, {})
     return parent_prop_value
 
 
-# In[14]:
+# In[136]:
 
 
 def get_all_properties(content: str, target_prop: str, file_path: str, properties: Dict[str, str] = None):
     if properties is None:
         properties = {}
     else:
-        properties = properties.copy()  # Avoid side effects
+        properties = properties.copy()
 
     try:
         root = ET.fromstring(content)
@@ -493,7 +465,6 @@ def get_all_properties(content: str, target_prop: str, file_path: str, propertie
         if 'xmlns' in root.attrib:
             NAMESPACE['mvn'] = root.attrib['xmlns']
 
-        # Properly assign keys without shadowing target_prop
         for prop in root.findall(".//mvn:properties/*", NAMESPACE):
             if prop.tag and prop.text:
                 key = prop.tag.split('}')[-1]
@@ -504,7 +475,7 @@ def get_all_properties(content: str, target_prop: str, file_path: str, propertie
         return "UNRESOLVED"    
 
 
-# In[15]:
+# In[137]:
 
 
 def process_commit_pom(repo, commit_hash, changed_files, dependencies_snapshot):
@@ -517,14 +488,10 @@ def process_commit_pom(repo, commit_hash, changed_files, dependencies_snapshot):
     return dependencies_snapshot
 
 
-# In[16]:
+# In[138]:
 
 
-# Cell 2: System‐name normalization
 def normalize_system(system: str) -> str:
-    """
-    Map generic system names to the deps.dev API identifiers.
-    """
     mapping = {
         "java": "maven",
         "javascript": "npm",
@@ -534,28 +501,20 @@ def normalize_system(system: str) -> str:
     return mapping.get(system, system)
 
 
-# In[17]:
+# In[139]:
 
 
-# Cell 3: Version parsing helper
 def get_major_version(version_str: str):
-    """
-    Safely extract the major version number, or return None if invalid.
-    """
     try:
         return Version(version_str).major
     except InvalidVersion:
         return None
 
 
-# In[18]:
+# In[140]:
 
 
-# Cell 4: Fetching & caching package data
 def fetch_package_data(package_name: str, system: str) -> dict:
-    """
-    Hit the deps.dev API and return the raw JSON for a given package.
-    """
     encoded = urllib.parse.quote(package_name, safe="")
     url = f"https://api.deps.dev/v3alpha/systems/{system}/packages/{encoded}"
     resp = requests.get(url)
@@ -563,36 +522,21 @@ def fetch_package_data(package_name: str, system: str) -> dict:
     return resp.json()
 
 
-# In[19]:
+# In[141]:
 
 
 def get_cached_package_data(package_name: str, system: str) -> dict:
-    """
-    Return cached data if available, otherwise fetch and cache.
-    """
-    '''if package_name not in cached_versions[system]:
-        try:
-            cached_versions[system][package_name] = fetch_package_data(package_name, system)
-        except requests.RequestException as e:
-            print(f"❌ Failed to fetch data for {package_name} ({system}): {e}")
-            cached_versions[system][package_name] = {}
-    return cached_versions[system][package_name]
-    '''
     LogFile = open("LOG_FILE.txt", "a")
     if package_name not in cached_versions[system]:
         try:
-            # 1) root data
             data = fetch_package_data(package_name, system)
             try:
-                # 2) pick a version (first in the list)
                 versions = data.get("versions", [])
                 if not versions:
                     raise RuntimeError(f"No versions found for {package_name}")
-                # if versions is a list of strings:
-                chosen_version = versions[0].get("versionKey", {}).get("version")
-                # if it's list of objects, adjust to versions[0]["version"]
 
-                # 3) fetch version-specific metadata
+                chosen_version = versions[0].get("versionKey", {}).get("version")
+
                 pkg_enc = urllib.parse.quote(package_name, safe="")
                 ver_url = (
                     f"https://api.deps.dev/v3/systems/{system}"
@@ -601,10 +545,7 @@ def get_cached_package_data(package_name: str, system: str) -> dict:
                 ver_resp = requests.get(ver_url)
                 ver_resp.raise_for_status()
                 version_data = ver_resp.json()
-                #print(version_data)
-                #data["version_data"] = version_data
 
-                # 4) fetch OSSF score if available
                 rel = version_data.get("relatedProjects", [])
                 if rel:
                     project_key = rel[0].get("projectKey", {}).get("id")
@@ -616,13 +557,10 @@ def get_cached_package_data(package_name: str, system: str) -> dict:
                     ossf_url = f"https://api.deps.dev/v3/projects/{pk_enc}"
                     ossf_resp = requests.get(ossf_url)
                     if ossf_resp.ok:
-                        #print(f"OSSF score for {package_name} (npm): {ossf_resp.json()}")
-                        #print(ossf_resp.json().get("scorecard").get("overallScore"))
                         data["ossf_score"] = ossf_resp.json().get("scorecard",{}).get("overallScore")
                         cached_versions[system][package_name] = data
                     else:
                         LogFile.write(f"[DEBUG] Failed to fetch OSSF score for {package_name} ({system}): {ossf_resp.status_code}\n")
-                        #print(f"❌ Failed to fetch OSSF score for {package_name} ({system}): {ossf_resp.status_code}")
                         data["ossf_score"] = None
                         cached_versions[system][package_name] = data
                 else:
@@ -630,22 +568,19 @@ def get_cached_package_data(package_name: str, system: str) -> dict:
                     data["ossf_score"] = None
                     cached_versions[system][package_name] = data
                     
-                # 5) cache the combined payload
             except requests.RequestException as e:
                 LogFile.write(f"[DEBUG] Failed to fetch version data for {package_name} ({system}): {e}\n")
-                #print(f"❌ Failed to fetch version data for {package_name} ({system}): {e}")
                 cached_versions[system][package_name] = data
 
         except (requests.RequestException, RuntimeError) as e:
             LogFile.write(f"[DEBUG] Failed to fetch data for {package_name} ({system}): {e}\n")
-            #print(f"❌ Failed to fetch data for {package_name} ({system}): {e}")
             cached_versions[system][package_name] = {}
 
     return cached_versions[system][package_name]
 
 
 
-# In[20]:
+# In[142]:
 
 
 def fetch_versions(group_id: str, artifact_id: str) -> list[str]:
@@ -660,7 +595,7 @@ def fetch_versions(group_id: str, artifact_id: str) -> list[str]:
     return [v.text for v in root.findall('versioning/versions/version')]
 
 
-# In[21]:
+# In[143]:
 
 
 def fetch_release_dates(group_id: str, artifact_id: str, versions: list[str]) -> dict[str, str]:
@@ -681,24 +616,15 @@ def fetch_release_dates(group_id: str, artifact_id: str, versions: list[str]) ->
     return release_dates
 
 
-# In[22]:
+# In[144]:
 
 
 def get_versions_with_dates_json(input_str: str) -> str:
-    """
-    Nimmt "group:artifact" als input, holt Versionen + Termine
-    und liefert einen JSON-String:
-    [
-      {"version": "...", "released": "..."},
-      ...
-    ]
-    """
     try:
         group, artifact = input_str.split(":")
         versions = fetch_versions(group, artifact)
         dates = fetch_release_dates(group, artifact, versions)
 
-        # Liste von Objekten, sortiert nach Datum
         items = {'versions': [
             {'versionKey': {'version': v}, 'publishedAt': dates[v]}
             for v in sorted(versions, key=lambda v: dates[v])
@@ -708,18 +634,10 @@ def get_versions_with_dates_json(input_str: str) -> str:
         return json.dumps({})
 
 
-# In[23]:
+# In[145]:
 
 
-# Cell 5: Core analysis routine
 def analyze_entry(entry: dict) -> dict:
-    """
-    Given a single change entry, enrich it with:
-      - newest_version_at_commit
-      - released_date
-      - latest_at_commit_time
-      - proj_version_lag (caret‐aware)
-    """
     pkg        = entry["dependency"].split(" ")[0].split("[")[0]
     raw_new    = entry["new_version"].split(" ")[0].split("[")[0]
     entry["new_version"] = raw_new
@@ -745,7 +663,6 @@ def analyze_entry(entry: dict) -> dict:
         entry["criticality"]= "N/A"
         return entry
 
-    #print(data)
     all_vers   = data.get("versions", [])
     commit_vs  = []
 
@@ -774,12 +691,9 @@ def analyze_entry(entry: dict) -> dict:
         entry["newest_version_at_commit"] = str(highest)
         entry["newest_version_at_commit"] = entry["newest_version_at_commit"].replace("a", "-alpha.").replace("b", "-beta.").replace("rc", "-rc.")
         entry["alpha/beta/rc"] = highest.pre is not None
-        
-        #        print(f"Highest version at commit: {highest}")
     else:
         entry["newest_version_at_commit"] = None
 
-    # Track release date & latest at commit
     entry["released_date"]         = None
     entry["latest_at_commit_time"] = None
     latest_pub_date = None
@@ -823,7 +737,6 @@ def analyze_entry(entry: dict) -> dict:
                 pub_dt = datetime.strptime(pub, "%Y-%m-%dT%H:%M:%SZ")
                 ver_obj = Version(ver_str)
             except (ValueError, InvalidVersion):
-                #print(f"Invalid version or date format: {ver_str} or {pub}")
                 continue
             # restrict to same major
             if target_major is not None and ver_obj.major != target_major:
@@ -834,7 +747,6 @@ def analyze_entry(entry: dict) -> dict:
     try:
         target = Version(new_ver)
     except InvalidVersion:
-        # handle bad new_ver here…
         target = None
 
     if entry["released_date"] is None and target is not None:
@@ -846,8 +758,6 @@ def analyze_entry(entry: dict) -> dict:
 
             try:
                 ver_obj = Version(ver_str)
-                # parse your timestamp however you like—
-                # here's ISO→datetime
                 pub_dt  = datetime.strptime(pub, "%Y-%m-%dT%H:%M:%SZ")
             except (ValueError, InvalidVersion):
                 continue
@@ -859,10 +769,7 @@ def analyze_entry(entry: dict) -> dict:
                 entry["released_date"] = pub_dt.isoformat()
                 break
     rel_date_str = entry.get("released_date")
-    released_date_dt = datetime.fromisoformat(rel_date_str) if rel_date_str else None
-
-    # Compute caret‐aware proj_version_lag
-    
+    released_date_dt = datetime.fromisoformat(rel_date_str) if rel_date_str else None    
 
     if this_and_above and baseline:
         same_maj = [v for v in commit_vs if v.major == baseline.major]
@@ -886,14 +793,12 @@ def analyze_entry(entry: dict) -> dict:
             entry["proj_version_lag"] = "N/A"
     
 
-    # Handle latency: 
     commit_str = entry.get("date")
     commit_dt  = datetime.strptime(commit_str,  "%Y-%m-%d %H:%M:%S")
 
     release_str = entry.get("released_date")
     if release_str is None:
         entry["latency"] = "N/A"
-        #print(f"Warning: No release date found for {pkg} at commit {commit_str} with version {new_ver}")
         return entry
     
 
@@ -916,16 +821,14 @@ def analyze_entry(entry: dict) -> dict:
         entry["latency"] = 0
         entry["proj_version_lag"] = 0
 
-    #print(data.get("ossf_score", {}))
     entry["criticality"] = data.get("ossf_score", "N/A")
 
     return entry
 
 
-# In[24]:
+# In[146]:
 
 
-# Cell 6: Batch processing function
 def process_json_file(input_path: str, output_path: str):
     """
     Read the input JSON, enrich each entry, and write to output.
@@ -936,7 +839,6 @@ def process_json_file(input_path: str, output_path: str):
     enriched = []
     for i, e in enumerate(entries, 1):
         enriched.append(analyze_entry(e))
-        #print(f"[{i}/{len(entries)}] {e['dependency']} → done")
 
     with open(output_path, "w") as f:
         json.dump(enriched, f, indent=2)
@@ -946,7 +848,7 @@ def process_json_file(input_path: str, output_path: str):
 # 
 # Three loaders—one per file‐type—to checkout a SHA and read content:
 
-# In[25]:
+# In[147]:
 
 
 def load_file_at_commit_pom(repo, commit_hash, file_path):
@@ -961,7 +863,7 @@ def load_file_at_commit_pom(repo, commit_hash, file_path):
         return None
 
 
-# In[26]:
+# In[148]:
 
 
 def load_file_at_commit_py_js(repo_path, commit_hash, file_path):
@@ -975,7 +877,6 @@ def load_file_at_commit_py_js(repo_path, commit_hash, file_path):
         )
         return result.stdout
     except subprocess.CalledProcessError as e:
-        #print(f"Error loading file '{file_path}' at commit '{commit_hash}': {e.stderr}")
         try:
             LogFile.write(f"[DEBUG] Error loading file '{file_path}' at commit '{commit_hash}': {e.stderr}\n")
             LogFile.flush()
@@ -985,7 +886,7 @@ def load_file_at_commit_py_js(repo_path, commit_hash, file_path):
 
 
 
-# In[27]:
+# In[149]:
 
 
 def load_file_at_commit_gradle(repo, commit_hash, file_path):
@@ -1005,7 +906,7 @@ def load_file_at_commit_gradle(repo, commit_hash, file_path):
 # 
 # Split `requirements.txt`, `setup.py`, `pyproject.toml` or `package.json` into dependency dicts:
 
-# In[28]:
+# In[150]:
 
 
 def process_commit_file_content(repo_path, sha, file_path, type):
@@ -1015,7 +916,7 @@ def process_commit_file_content(repo_path, sha, file_path, type):
         parse_file_content(content, sha, file_path, type)
 
 
-# In[ ]:
+# In[151]:
 
 
 def parse_pyproject_toml(content: str) -> dict:
@@ -1024,10 +925,8 @@ def parse_pyproject_toml(content: str) -> dict:
     except tomli.TOMLDecodeError:
         return {}
 
-    # PEP 621 style
     deps = data.get("project", {}).get("dependencies", [])
     if not deps:
-        # Poetry-style
         poetry_deps = data.get("tool", {}).get("poetry", {}).get("dependencies", {})
         deps = [f"{pkg}{v if isinstance(v, str) else ''}" for pkg, v in poetry_deps.items() if pkg.lower() != "python"]
 
@@ -1042,7 +941,7 @@ def parse_pyproject_toml(content: str) -> dict:
 
 
 
-# In[ ]:
+# In[152]:
 
 
 def parse_setup_py(content: str) -> dict:
@@ -1078,7 +977,7 @@ def parse_setup_py(content: str) -> dict:
     return result
 
 
-# In[31]:
+# In[153]:
 
 
 def parse_file_content(content, sha, filename, type):
@@ -1087,16 +986,14 @@ def parse_file_content(content, sha, filename, type):
 
     if type == "py" and "requirements.txt" in filename:
         for line in content.splitlines():
-            line = line.strip().split(";", 1)[0]  # Remove comments after semicolon
+            line = line.strip().split(";", 1)[0]
 
-            if not line or line.startswith('#') or line.startswith("--"):  # Ignore comments and empty lines
+            if not line or line.startswith('#') or line.startswith("--"):  
                 continue
 
-            # Check if line is a hash
             if hash_pattern.match(line):
                 continue
 
-            # Remove inline comments
             if '#' in line:
                 line = line.split('#', 1)[0].strip()
 
@@ -1109,7 +1006,7 @@ def parse_file_content(content, sha, filename, type):
                     version = version.strip()
                     dependencies[package] = version
                     break
-            else:  # No version specifier found
+            else:
                 package = line
                 dependencies[package] = "latest-version-available"
 
@@ -1138,7 +1035,7 @@ def parse_file_content(content, sha, filename, type):
 
 
 
-# In[32]:
+# In[154]:
 
 
 def save_results_python(output_file=f"{prefix}_python_and_javascript.json"):
@@ -1150,7 +1047,7 @@ def save_results_python(output_file=f"{prefix}_python_and_javascript.json"):
 # 
 # Extract Gradle `dependencies { … }` blocks, resolve property variables, group them, etc.:
 
-# In[33]:
+# In[155]:
 
 
 def is_gradle_related(file_path):
@@ -1165,7 +1062,7 @@ def is_gradle_related(file_path):
     )
 
 
-# In[34]:
+# In[156]:
 
 
 def parse_gradle_properties(content):
@@ -1179,7 +1076,7 @@ def parse_gradle_properties(content):
 
 
 
-# In[35]:
+# In[157]:
 
 
 def extract_dependencies_block(content: str) -> str:
@@ -1210,13 +1107,13 @@ def extract_dependencies_block(content: str) -> str:
 
 
 
-# In[36]:
+# In[158]:
 
 
 def parse_gradle_dependencies(file_content: str, properties: Dict[str, str], commit_sha: str, file_path: str) -> List[Dict[str, Any]]:
     dependencies = []
 
-    # NEW: extract only content inside dependencies block(s)
+    # extract only content inside dependencies block(s)
     block = extract_dependencies_block(file_content)
 
     # Patterns for Kotlin + Groovy
@@ -1242,19 +1139,16 @@ def parse_gradle_dependencies(file_content: str, properties: Dict[str, str], com
                 dependencies.append({
                     "commit": commit_sha,
                     "file": file_path,
-                    #"tool": "gradle",
-                    #"configuration": config,
                     "group": group,
                     "artifact": artifact,
                     "version": version,
-                    #"version_source": version_source
                 })
 
     return dependencies
 
 
 
-# In[37]:
+# In[159]:
 
 
 def parse_local_kotlin_variables(content: str) -> Dict[str, str]:
@@ -1268,7 +1162,7 @@ def parse_local_kotlin_variables(content: str) -> Dict[str, str]:
     return props
 
 
-# In[38]:
+# In[160]:
 
 
 def process_commit_gradle(repo, commit_hash, changed_files, dependencies_snapshot, all_dependencies, properties_by_commit):
@@ -1288,10 +1182,7 @@ def process_commit_gradle(repo, commit_hash, changed_files, dependencies_snapsho
             # Parse dependencies from .gradle or .gradle.kts files
             elif file_path.endswith(".gradle") or file_path.endswith(".gradle.kts"):
                 props = {}
-                #props.update(parse_ext_block(content))                  # ext { ... }
-                #props.update(parse_extra_assignments(content))          # extra["..."] = ...
-                #props.update(extract_project_properties(content))       # group/version/name
-                props.update(parse_local_kotlin_variables(content))     # val/var = "..."
+                props.update(parse_local_kotlin_variables(content))
 
                 if commit_hash not in properties_by_commit:
                     properties_by_commit[commit_hash] = {}
@@ -1304,7 +1195,7 @@ def process_commit_gradle(repo, commit_hash, changed_files, dependencies_snapsho
     return dependencies_snapshot, all_dependencies
 
 
-# In[39]:
+# In[161]:
 
 
 def group_gradle_dependencies(dependencies):
@@ -1321,7 +1212,7 @@ def group_gradle_dependencies(dependencies):
     return grouped
 
 
-# In[40]:
+# In[162]:
 
 
 def to_dict(d):
@@ -1331,10 +1222,8 @@ def to_dict(d):
         d = {k: to_dict(v) for k, v in d.items()}
     return d
 
-#print(json.dumps(to_dict(grouped_dependencies), indent=2))
 
-
-# In[41]:
+# In[163]:
 
 
 def save_results_gradle(data, output_file=f"{prefix}_dependencies_over_time.json"):
@@ -1346,7 +1235,7 @@ def save_results_gradle(data, output_file=f"{prefix}_dependencies_over_time.json
 # 
 # Utilities to deep‐merge the three language‐specific dicts and prune empty entries:
 
-# In[42]:
+# In[164]:
 
 
 def merge_dependencies(python_and_javascript: Dict, java: Dict, gradle: Dict) -> Dict:
@@ -1366,7 +1255,7 @@ def merge_dependencies(python_and_javascript: Dict, java: Dict, gradle: Dict) ->
         # Add Java dependencies if present
         if commit in java:
             for file, content in java[commit].items():
-                merged_data[commit]["java"][file] = content  # No renaming!
+                merged_data[commit]["java"][file] = content
         
         if commit in gradle:
             gradle_files = gradle[commit].get("gradle", {})  # Extract only the inner part
@@ -1387,7 +1276,7 @@ def merge_dependencies(python_and_javascript: Dict, java: Dict, gradle: Dict) ->
     return merged_data
 
 
-# In[43]:
+# In[165]:
 
 
 def remove_empty_objects(data):
@@ -1395,7 +1284,7 @@ def remove_empty_objects(data):
         return {
             k: remove_empty_objects(v)
             for k, v in data.items()
-            if not (isinstance(v, dict) and not v)  # remove empty dicts
+            if not (isinstance(v, dict) and not v)
         }
     elif isinstance(data, list):
         return [remove_empty_objects(item) for item in data]
@@ -1409,7 +1298,7 @@ def remove_empty_objects(data):
 # 
 # ### 3.1 Initialize & Clone
 
-# In[44]:
+# In[166]:
 
 
 sep = "=" * 80
@@ -1422,7 +1311,7 @@ LogFile.write(sep + "\n\n")
 LogFile.flush()
 
 
-# In[45]:
+# In[167]:
 
 
 if not os.path.exists(destination_path) or not os.listdir(destination_path):
@@ -1431,7 +1320,7 @@ else:
 	print(f"Directory '{destination_path}' already exists and is not empty. Skipping clone.")
 
 
-# In[46]:
+# In[168]:
 
 
 repo = Repo(destination_path)
@@ -1440,20 +1329,17 @@ repo = Repo(destination_path)
 # ### 3.2 Discover Files
 # 
 
-# In[47]:
+# In[169]:
 
 
-# Example usage
 try:
     LogFile.write("[INFO] LOOKING FOR FILES")
     LogFile.flush()
 except Exception as e:
     pass
 
-
-repo_path = "./" + repo_name  # Replace with your cloned repo path
-file_paths = find_all_files(repo_path)
-file_paths_gradle = find_all_gradle_files(repo_path)
+file_paths = find_all_files(destination_path)
+file_paths_gradle = find_all_gradle_files(destination_path)
 file_paths += file_paths_gradle
 
 
@@ -1462,6 +1348,7 @@ try:
     LogFile.flush()
 except Exception as e:
     pass
+
 # Display all found pom.xml paths
 for path in file_paths:
     path = path.replace('\\', '/')
@@ -1476,16 +1363,14 @@ try:
     LogFile.flush()
 except Exception as e:
     pass
-#print(len(file_paths))
 
 
 # ### 3.3 List Commits
 # 
 
-# In[48]:
+# In[170]:
 
 
-# Example usage
 try:
     LogFile.write("[INFO] LOOKING FOR COMMITS\n")
     LogFile.flush()
@@ -1494,10 +1379,6 @@ except Exception as e:
 
 sorted_commit_hashes = get_all_relevant_commits(repo_path, file_paths)
 
-# Display results
-#print(f"Total number of commits: {len(sorted_commit_hashes)}")
-#print("Commits (earliest to latest):")
-
 try:
     LogFile.write(f"[DEBUG] Total number of commits: {len(sorted_commit_hashes)}\n")
     LogFile.flush()
@@ -1505,8 +1386,7 @@ except Exception as e:
     pass
 
 
-for commit_hash, files in list(sorted_commit_hashes.items()):  # Displaying the first 10 for brevity
-    #print(f"{commit_hash}: {files}")
+for commit_hash, files in list(sorted_commit_hashes.items()):
     try:
         LogFile.write(f"[DEBUG] {commit_hash}: {files}\n")
         LogFile.flush()
@@ -1517,7 +1397,7 @@ for commit_hash, files in list(sorted_commit_hashes.items()):  # Displaying the 
 # ### 3.4 Parse Java-POM
 # 
 
-# In[49]:
+# In[171]:
 
 
 try:
@@ -1547,10 +1427,9 @@ except Exception as e:
 # ### 3.5 Parse Python & JS
 # 
 
-# In[ ]:
+# In[172]:
 
 
-# Initialize cache and data structures
 file_cache_python = {}
 unique_entries = set()
 dependency_changes = defaultdict(list)
@@ -1561,7 +1440,7 @@ VERSION_SPECIFIERS = [
 ]
 
 
-# In[51]:
+# In[173]:
 
 
 try:
@@ -1583,7 +1462,7 @@ except Exception as e:
 # ### 3.6 Parse Java-Gradle
 # 
 
-# In[52]:
+# In[174]:
 
 
 try:
@@ -1594,10 +1473,6 @@ except Exception as e:
 
 dependencies_over_time, all_dependencies = process_commits_gradle(repo, sorted_commit_hashes)
 
-# Optionally print the parsed dependencies
-#for dep in all_dependencies:
-    #print(dep)
-
 cleaned_dependencies = [
     dep for dep in all_dependencies
     if "$" not in dep["group"]
@@ -1605,8 +1480,6 @@ cleaned_dependencies = [
     and "$" not in dep["version"]
 ]
 
-#for dep in cleaned_dependencies [:10]:
-#    print(dep)
 try:
     LogFile.write(f"[DEBUG] Processed {len(dependencies_over_time)} commits\n")
     LogFile.flush()
@@ -1614,14 +1487,13 @@ except Exception as e:
     pass
 
 
-# In[53]:
+# In[175]:
 
 
 grouped_dependencies = group_gradle_dependencies(cleaned_dependencies)
-# Convert the defaultdict to a normal dict recursively
 
 
-# In[54]:
+# In[176]:
 
 
 save_results_gradle(to_dict(grouped_dependencies), f"{prefix}_java_gradle.json")
@@ -1637,7 +1509,7 @@ except Exception as e:
 # ### 3.7 Merge & Save
 # 
 
-# In[55]:
+# In[177]:
 
 
 with open(f'{prefix}_python_and_javascript.json', 'r') as f:
@@ -1665,7 +1537,7 @@ save_merged_data(new_merged_data, f'{prefix}_merged_dependencies.json')
 # 
 # 
 
-# In[56]:
+# In[178]:
 
 
 try:
@@ -1674,27 +1546,16 @@ try:
 except Exception as e:
     pass
 
-# Load input data
 with open(f"{prefix}_merged_dependencies.json", "r") as f:
     data = json.load(f)
 
-# Your commit-to-date mapping
-commit_dates = commits_with_date  # assumed to be defined already
-
-# Ensure chronological commit order
-sorted_commits = sorted(data.keys(), key=lambda c: commit_dates.get(c))
-
-# Global latest version per dependency
+sorted_commits = sorted(data.keys(), key=lambda c: commits_with_date.get(c))
 latest_versions = {}
-
-# Last known dependency set per file
-last_file_state = {}  # (system, filename) -> {dep: version}
-
-# All changes (add, update, remove)
+last_file_state = {}
 changes = []
 
 for commit in sorted_commits:
-    date = commit_dates.get(commit)
+    date = commits_with_date.get(commit)
     commit_data = data[commit]
 
     for system, files in commit_data.items():
@@ -1702,7 +1563,6 @@ for commit in sorted_commits:
             file_key = (system, filename)
             prev_deps = last_file_state.get(file_key, {})
 
-            # Check for added/updated
             for dep, new_version in curr_deps.items():
                 old_version = latest_versions.get(dep)
                 if dep not in prev_deps:
@@ -1728,13 +1588,10 @@ for commit in sorted_commits:
                         "new_version": new_version.split(" ")[0]
                     })
 
-                # Always update the global version
                 latest_versions[dep] = new_version
 
-            # Save current state for next round
             last_file_state[file_key] = copy.deepcopy(curr_deps)
 
-# Save all detected changes
 with open(f"{prefix}_dependency_changes_with_removed.json", "w") as f:
     json.dump(changes, f, indent=2)
 
@@ -1745,10 +1602,9 @@ except Exception as e:
     pass
 
 
-# In[57]:
+# In[179]:
 
 
-# Cell 7: Execute!
 try:
     LogFile.write(f"{seq}\n")
     LogFile.write(f"[INFO] ENRICHING DEPENDENCY CHANGES\n")
@@ -1762,7 +1618,7 @@ process_json_file(
     )
 
 
-# In[58]:
+# In[180]:
 
 
 try:
@@ -1772,22 +1628,78 @@ try:
 except Exception as e:
     pass
 result = compute_per_commit_file_metrics(f"{prefix}_dependency_changes_enriched.json", weeks=13)
-# Ausgabe im CSV-Format
-result.to_csv(f'{prefix}_metrics_output.csv',index=False, sep=';', encoding='utf-8')
+
+result.to_csv(f'{prefix}_metrics_output.csv',index=False, sep=',', encoding='utf-8')
 
 try:
     LogFile.write(f"[DEBUG] Metrics saved to {prefix}_metrics_output.csv\n")
+    LogFile.write(f"{seq}\n")
+    LogFile.flush()
+except Exception as e:
+    pass
+
+
+# In[181]:
+
+
+try:
+    LogFile.write(f"[INFO] COLLECTING DEPENDENCIES\n")
+    LogFile.flush()
+except Exception as e:
+    pass
+
+
+def compute_per_commit_file_metrics(input_path: str, weeks: int = 13) -> pd.DataFrame:    
+    json_path  = f'{prefix}_dependency_changes_enriched.json'
+    output_csv = f'{prefix}_commits_dependencies.csv'
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        df = pd.DataFrame(data)
+        if df.empty:
+            combined = pd.DataFrame(columns=['commit_hash', 'commit_date', 'commit_file', 'dependencies'])
+            combined.to_csv(output_csv, index=False)
+        detailed = (
+            df
+            .groupby(['commit', 'date', 'filename'], as_index=False)
+            ['dependency']
+            .agg(lambda deps: ';'.join(sorted(set(deps))))
+            .rename(columns={
+                'commit': 'commit_hash',
+                'date': 'commit_date',
+                'filename': 'commit_file',
+                'dependency': 'dependencies'
+            })
+        )
+        all_deps = sorted(df['dependency'].dropna().unique())
+        summary = pd.DataFrame([{
+            'commit_hash': 'PROJECT_SUMMARY',
+            'commit_date': '',
+            'commit_file': '',
+            'dependencies': ';'.join(all_deps)
+        }])
+
+        combined = pd.concat([detailed, summary], ignore_index=True)
+        combined['commit_date'] = pd.to_datetime(combined['commit_date'], errors='coerce')
+        combined = combined.sort_values('commit_date', na_position='last')
+        combined['commit_date'] = combined['commit_date'].dt.strftime('%Y-%m-%d %H:%M:%S').fillna('')
+        combined.to_csv(output_csv, index=False)
+    except Exception as e:
+        pass
+
+compute_per_commit_file_metrics(f"{prefix}_dependency_changes_enriched.json", weeks=13)
+
+try:
+    LogFile.write(f"[DEBUG] Metrics saved to {prefix}_commits_dependencies.csv\n")
     LogFile.write(f"{seq}\n\n\n\n")
     LogFile.flush()
     LogFile.close()
 except Exception as e:
     pass
 
-p = Path('.')
-for file in p.glob(f"{prefix}_*.json"):
-    file.unlink()
-    print(f"Deleted {file}")
-# In[59]:
+
+
+# In[182]:
 
 
 p = Path('.')
