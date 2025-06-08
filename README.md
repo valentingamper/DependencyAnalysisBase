@@ -47,15 +47,34 @@ The `results/` folder contains sample output files showing:
 
 Use these files as a reference for format and content.
 
+
+---
+
+
+## Contact
+
+For questions or issues, please open an issue on GitHub:
+
+[https://github.com/Konstiu/DependencyAnalysis/issues](https://github.com/Konstiu/DependencyAnalysis/issues)
+
+
+
 ---
 
 ## License
 
 Distributed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
 
-
-
 ---
+
+<!---
+[/-asdfdasffasdfdsdaff 
+adsffsad 
+/]
+---
+
+
+
 
 ## Table of Contents
 
@@ -83,4 +102,4 @@ Distributed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
   - [3.7 Merge & Save](./Dependency_analysis_notebook.ipynb#37-merge-save)
 - [4. Results & Calculated Metrics](./Dependency_analysis_notebook.ipynb#4-results-calculated-metrics)
 
----
+--->
