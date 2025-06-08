@@ -1,10 +1,61 @@
 # Repository Dependency Metrics Analysis
 
-A Jupyter notebook to clone a GitHub repo, extract dependency metrics for Java (Maven & Gradle), Python, and JavaScript files across commits, and save the results as JSON.
+Analyse how dependencies evolve over a repository’s history and reproduce the example outputs in `results/`.
+
+# Dependency Metrics Analysis
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
 
 ---
 
-## Table of Contents
+## Installation
+
+Choose one of the following methods:
+
+### A. Conda
+
+```bash
+# 1. Create the environment from the YAML file
+conda env create -f environment.yml
+
+# 2. Activate it
+donda activate dependency-analysis
+```
+
+### B. pip
+
+````
+pip install -r requirements.txt
+````
+
+## Usage
+
+To reproduce the sample outputs in the `results/` directory:
+
+````bash
+./Run_by_name.sh
+````
+
+
+## Results Directory
+
+The `results/` folder contains sample output files showing:
+
+* Per-commit dependency counts by file type (CSV)
+* Optional JSON summaries of dependency changes
+
+Use these files as a reference for format and content.
+
+---
+
+## License
+
+Distributed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
+
+
+
+---
 
 ## Table of Contents
 
