@@ -34,7 +34,7 @@ pip install -r requirements.txt
 To reproduce the sample outputs in the `results/` directory:
 
 ````bash
-./Run_by_name.sh
+./run-dep-analysis.sh
 ````
 
 
