@@ -31,28 +31,3 @@ Each CSV has the following columns:
 | `proj_alpha_used` | numeric | Number of how many alpha/beta/rc version were used in that commit| 
 
 > **Note**: missing values are denoted as "N/A".
-
-## How to use
-
-1. **Clone the repo** (if you haven’t already):  
-   ```bash
-   git clone https://github.com/Konstiu/DependencyAnalysis.git
-   cd DependencyAnalysis/results
-   ```
-
-
-2. **Inspect a CSV** with your tool of choice, e.g.:
-
-   ```python
-   import pandas as pd
-   df = pd.read_csv("zaproxy_zaproxy_metrics_output.csv")
-   ```
-
-
-
-## Contact
-
-For questions or issues, please open an issue on GitHub:
-
-[https://github.com/Konstiu/DependencyAnalysis/issues](https://github.com/Konstiu/DependencyAnalysis/issues)
-
