@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build-and-run:
+  build-from-env-yml:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,7 +31,7 @@ jobs:
         conda env create -f environment.yml
       shell: bash
 
-    - name: Run Script with Timeout
+    - name: Run Script
       run: |
         source "$(conda info --base)/etc/profile.d/conda.sh"
         conda activate dependency-analysis # Ersetze DEIN_ENV_NAME!
@@ -44,4 +44,52 @@ jobs:
       run: |
         source "$(conda info --base)/etc/profile.d/conda.sh"
         conda env remove -n dependency-analysis -y
+      shell: bash
+
+  build-from-requirements-txt:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Miniconda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        miniconda-version: 'latest'
+        auto-update-conda: true
+        python-version: 3.12.9
+        auto-activate-base: false
+
+    - name: Create Clean Conda Environment
+      run: |
+        # Erstellt eine leere Conda-Umgebung nur mit Python
+        # Ersetze 'my_pip_env' durch den gewünschten Namen für diese Umgebung
+        conda create -n my_pip_env python=3.12 -y
+      shell: bash
+
+    - name: Activate Environment and Install from requirements.txt
+      run: |
+        source "$(conda info --base)/etc/profile.d/conda.sh"
+        # Ersetze 'my_pip_env'
+        conda activate my_pip_env
+        
+        # Installiere alle Pakete aus deiner requirements.txt
+        pip install -r requirements.txt
+      shell: bash
+
+    - name: Run Python Script in Pip Env
+      run: |
+        source "$(conda info --base)/etc/profile.d/conda.sh"
+        # Ersetze 'my_pip_env'
+        conda activate my_pip_env
+        
+        # Führe dein Python-Skript aus
+        python Dependency_analysis_notebook.py mitre/caldera
+      shell: bash
+
+    - name: Clean up Conda Environment (Req.txt)
+      if: always()
+      run: |
+        source "$(conda info --base)/etc/profile.d/conda.sh"
+        conda env remove -n my_pip_env -y # Ersetze hier ebenfalls den Namen
       shell: bash
