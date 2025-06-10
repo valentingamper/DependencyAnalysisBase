@@ -36,7 +36,7 @@ jobs:
         source "$(conda info --base)/etc/profile.d/conda.sh"
         conda activate dependency-analysis # Ersetze DEIN_ENV_NAME!
         
-        bash python Dependency_analysis_notebook.py mitre/caldera # Dein eigentliches Skript
+        python Dependency_analysis_notebook.py mitre/caldera # Dein eigentliches Skript
       shell: bash
 
     - name: Clean up Conda Environment
