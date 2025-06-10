@@ -1,0 +1,47 @@
+name: Test Conda Env and Run Script with Timeout (Simplified)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Miniconda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        miniconda-version: 'latest'
+        auto-update-conda: true
+        python-version: 3.12.9
+        auto-activate-base: false
+
+    - name: Create Conda Environment from environment.yml
+      run: |
+        # Dieser Befehl selbst ist der "Test", ob die Umgebung gebaut werden kann.
+        # Wenn er fehlschlägt, schlägt der Schritt fehl.
+        conda env create -f environment.yml
+      shell: bash
+
+    - name: Run Script with Timeout
+      run: |
+        source "$(conda info --base)/etc/profile.d/conda.sh"
+        conda activate dependency-analysis # Ersetze DEIN_ENV_NAME!
+        
+        timeout 10s bash run-dep-analysis.sh # Dein eigentliches Skript
+      shell: bash
+
+    - name: Clean up Conda Environment
+      if: always()
+      run: |
+        source "$(conda info --base)/etc/profile.d/conda.sh"
+        conda env remove -n dependency-analysis -y
+      shell: bash
