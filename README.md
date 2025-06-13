@@ -20,7 +20,7 @@ Choose one of the following methods:
 conda env create -f environment.yml
 
 # 2. Activate it
-donda activate dependency-analysis
+conda activate dependency-analysis
 ```
 
 ### B. pip
