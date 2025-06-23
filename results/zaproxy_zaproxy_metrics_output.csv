@@ -1,11 +1,11 @@
 commit_hash,commit_date,file_path,proj_update_frequency,proj_mtbu,proj_update_latency,proj_version_lag,proj_criticality_scoreAVG,proj_criticality_scoreSUM,proj_alpha_best,proj_alpha_used
 8cc30d8daec20df2f5dc35563d5886e32b651b1c,2017-12-14 13:14:45,build/docker/requirements.txt,N/A,11.78,0.0,0.0,N/A,N/A,0,0.0
 efb404d38280dc9ecf8f88c9b0c658385861bdcf,2018-03-07 01:05:11,docker/requirements.txt,1.0,11.78,0.0,0.0,N/A,N/A,0,0.0
-8960befa37a1e5e04b80cb044aa5121af115dd43,2019-05-23 09:37:38,zap/zap.gradle.kts,44.0,55.42,2033.48,3.17,N/A,N/A,0,0.0
+8960befa37a1e5e04b80cb044aa5121af115dd43,2019-05-23 09:37:38,zap/zap.gradle.kts,44.0,54.43,2033.48,3.17,N/A,N/A,0,0.0
 53e33f148b38ec9b1b6946edaf93c46a26646c5a,2019-05-23 09:37:42,buildSrc/build.gradle.kts,44.0,49.44,167.33,0.0,N/A,N/A,0,0.0
 e025aa512d48cc4a5ed7716c8a7714a264132c02,2019-05-23 09:39:26,zap/zap.gradle.kts,44.0,76.7,2191.0,4.67,N/A,N/A,0,0.0
 7ec200ca03b256e529380452ea7e1c8b288a0441,2019-05-23 09:51:30,buildSrc/build.gradle.kts,44.0,55.4,N/A,N/A,N/A,N/A,0,0.0
-03432909ded3736550d72f82ed99250508772294,2019-05-29 08:30:45,zap/zap.gradle.kts,44.0,35.83,591.87,0.0,N/A,N/A,0,0.0
+03432909ded3736550d72f82ed99250508772294,2019-05-29 08:30:45,zap/zap.gradle.kts,44.0,34.31,591.87,0.0,N/A,N/A,0,0.0
 654ce4145b5371c49e178764ba247ef924c8176e,2019-05-29 13:59:53,zap/zap.gradle.kts,44.0,0.88,1312.0,0.0,N/A,N/A,0,0.0
 1ab86ed3fbe20e0cda6ea26d8da8ac10fe7a3cf9,2019-05-31 10:22:26,buildSrc/build.gradle.kts,44.0,146.72,146.0,0.0,N/A,N/A,0,0.0
 304b357906cd7f56531deb7278efc9b09b6ad567,2019-05-31 11:25:56,buildSrc/build.gradle.kts,44.0,293.44,204.0,0.0,N/A,N/A,0,0.0
@@ -14,11 +14,10 @@ e025aa512d48cc4a5ed7716c8a7714a264132c02,2019-05-23 09:39:26,zap/zap.gradle.kts,
 d7a6b87c72bc3afe01e149513a63c1c249b42aa7,2019-08-19 09:23:32,zap/zap.gradle.kts,4.0,8.04,10.5,4.0,N/A,N/A,0,0.0
 0e3e871eac211766f46cd84c478f6edfbc53ba91,2019-08-29 13:17:49,buildSrc/build.gradle.kts,4.0,57.43,N/A,N/A,N/A,N/A,0,0.0
 0e3e871eac211766f46cd84c478f6edfbc53ba91,2019-08-29 13:17:49,zap/zap.gradle.kts,4.0,12.02,20.5,4.0,N/A,N/A,0,0.0
-c5ba49bc4fa78cae709269d4177bb5b0db72a1eb,2019-10-08 19:19:18,zap/zap.gradle.kts,14.0,0.46,7.0,0.0,N/A,N/A,0,0.0
-6f9e7a9fa3373a708e22fb0b50684429fe5ee016,2019-10-12 01:00:48,zap/zap.gradle.kts,14.0,0.46,10.0,0.0,N/A,N/A,0,0.0
+c5ba49bc4fa78cae709269d4177bb5b0db72a1eb,2019-10-08 19:19:18,zap/zap.gradle.kts,14.0,2.0,7.0,0.0,N/A,N/A,0,0.0
 4a1710484a877e880f955ffd7c1a3ee9b40a07bc,2019-10-12 01:00:48,zap/zap.gradle.kts,14.0,20.23,1827.0,7.0,N/A,N/A,0,0.0
-e6628d2da4e8907bb69defac1fb9677d09c0465e,2019-10-22 18:59:00,zap/zap.gradle.kts,14.0,17.73,39.8,0.0,N/A,N/A,0,0.0
-ffb5b9d6ee648a7e9982bf9eda720f7425211fcb,2019-11-11 18:27:41,zap/zap.gradle.kts,14.0,34.69,103.0,0.0,N/A,N/A,0,0.0
+e6628d2da4e8907bb69defac1fb9677d09c0465e,2019-10-22 18:59:00,zap/zap.gradle.kts,14.0,15.11,36.67,0.0,N/A,N/A,0,0.0
+ffb5b9d6ee648a7e9982bf9eda720f7425211fcb,2019-11-11 18:27:41,zap/zap.gradle.kts,14.0,31.44,103.0,0.0,N/A,N/A,0,0.0
 ee2be97cca38ed4f33d26b1c3a467cd73cb90e16,2019-12-20 23:44:59,zap/zap.gradle.kts,5.0,18.53,97.25,0.5,N/A,N/A,0,0.0
 fc3ac09dad86d5256a64dff905d6a4fd6fca29cb,2020-02-25 13:00:44,zap/zap.gradle.kts,5.0,5.82,8.0,0.0,N/A,N/A,0,0.0
 a014d33a3a5da0abfd7e1b7a14b272280e002619,2020-04-02 17:02:16,zap/zap.gradle.kts,6.0,5.82,0.0,0.0,N/A,N/A,0,0.0
@@ -89,8 +88,8 @@ bb3fdf64e4c3dc4662a03925303eaf43d626da83,2022-09-26 12:51:59,zap/zap.gradle.kts,
 ed170bbd39c2a88643f0631e87d0eb9fc058c6d0,2022-10-27 08:27:57,zap/zap.gradle.kts,22.0,26.32,4.0,0.0,N/A,N/A,0,0.0
 0285e74387b0b767e196b31c3bd50716cc759e15,2022-12-20 08:50:02,zap/zap.gradle.kts,12.0,9.0,2.5,0.0,N/A,N/A,0,0.0
 fe329bfd6086dad21a9ee214a2210ecc0c6cb868,2023-01-14 12:32:33,zap/zap.gradle.kts,12.0,12.18,0.0,0.0,N/A,N/A,0,0.0
-a1811ce8e6bc93eff46ea0929b1945d0c297fa8a,2023-02-07 16:11:44,buildSrc/build.gradle.kts,12.0,53.11,12.33,0.0,N/A,N/A,0,0.0
 a1811ce8e6bc93eff46ea0929b1945d0c297fa8a,2023-02-07 16:11:44,zap/zap.gradle.kts,12.0,18.53,22.75,0.0,N/A,N/A,0,0.0
+a1811ce8e6bc93eff46ea0929b1945d0c297fa8a,2023-02-07 16:11:44,buildSrc/build.gradle.kts,12.0,53.11,12.33,0.0,N/A,N/A,0,0.0
 6bd01ac142f32f1a940ce0e85ba8141a89608640,2023-03-07 22:02:03,zap/zap.gradle.kts,12.0,15.26,16.0,1.0,N/A,N/A,0,0.0
 0c91b6a2c1284687b5a15d4161c4fffc79e921c8,2023-04-12 22:43:43,zap/zap.gradle.kts,2.0,9.0,14.5,0.0,N/A,N/A,0,0.0
 77fd0c4242a275a2715fb0c2e261fdca118677ba,2023-06-13 10:36:57,buildSrc/build.gradle.kts,21.0,60.23,N/A,N/A,N/A,N/A,0,0.0
@@ -134,5 +133,6 @@ bb629478b8be98e87a31c021e3341650b994d8ee,2024-12-16 10:11:07,zap/zap.gradle.kts,
 c512cabb11dd9a12379e6c4fe27aef9a14aa5226,2025-01-13 13:14:15,buildSrc/build.gradle.kts,24.0,134.6,85.4,0.6,N/A,N/A,0,0.0
 dc25a7002e38c1868e022cc16c1fd6fbb67d15dc,2025-02-28 11:20:31,buildSrc/build.gradle.kts,24.0,51.45,N/A,0.0,N/A,N/A,0,0.0
 005b55d0580c1f2e1cd2c3ada880626e9e6a8f85,2025-03-02 14:40:43,zap/zap.gradle.kts,24.0,6.11,83.0,0.0,N/A,N/A,0,0.0
-d7cdc2bcfa82699c163740abb45d24ff7e1b0309,2025-03-24 15:04:59,zap/zap.gradle.kts,17.0,32.33,70.13,1.13,N/A,N/A,0,0.0
+d7cdc2bcfa82699c163740abb45d24ff7e1b0309,2025-03-24 15:04:59,zap/zap.gradle.kts,17.0,30.81,70.13,1.13,N/A,N/A,0,0.0
 fd18d0578bd9212fb0094a33d5890bf65d439c4d,2025-04-14 08:59:20,zap/zap.gradle.kts,17.0,5.97,2.0,0.0,N/A,N/A,0,0.0
+ac3e2e309e462f99c64c3777a48c07b5189dc7ba,2025-06-05 08:47:04,zap/zap.gradle.kts,17.0,78.75,10.0,0.0,N/A,N/A,0,0.0

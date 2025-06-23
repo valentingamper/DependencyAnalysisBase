@@ -1691,21 +1691,33 @@ compute_per_commit_file_metrics(f"{prefix}_dependency_changes_enriched.json", we
 
 try:
     LogFile.write(f"[DEBUG] Metrics saved to {prefix}_commits_dependencies.csv\n")
-    LogFile.write(f"{seq}\n\n\n\n")
     LogFile.flush()
-    LogFile.close()
 except Exception as e:
     pass
 
 
 
+try:
+    LogFile.write(f"[INFO] RUNNING getAllDepsPerCommt.py\n")
+    subprocess.run(["python", "getAllDepsPerCommit.py", prefix], check=True)
+    LogFile.write(f"{seq}\n\n\n\n")
+    LogFile.flush()
+    LogFile.close()
+except Exception as e:
+    try:
+        LogFile.write(f"[DEBUG] Error running getAllDepsPerCommt.py: {e}\n")
+        LogFile.write(f"{seq}\n\n\n\n")
+        LogFile.flush()
+        LogFile.close()
+    except Exception as e:
+        pass
 # In[182]:
 
 
-p = Path('.')
-for file in p.glob(f"{prefix}_*.json"):
-    file.unlink()
-    print(f"Deleted {file}")
+#p = Path('.')
+#for file in p.glob(f"{prefix}_*.json"):
+#    file.unlink()
+#    print(f"Deleted {file}")
 
 
 # In[ ]:
