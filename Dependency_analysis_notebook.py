@@ -1714,10 +1714,10 @@ except Exception as e:
 # In[182]:
 
 
-#p = Path('.')
-#for file in p.glob(f"{prefix}_*.json"):
-#    file.unlink()
-#    print(f"Deleted {file}")
+p = Path('.')
+for file in p.glob(f"{prefix}_*.json"):
+    file.unlink()
+    print(f"Deleted {file}")
 
 
 # In[ ]:
