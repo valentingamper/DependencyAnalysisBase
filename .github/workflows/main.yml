@@ -1,12 +1,13 @@
 name: Test Conda Env and Run Script with Timeout (Simplified)
 
-on:
+on: 
   push:
     branches:
       - main
   pull_request:
     branches:
       - main
+  workflow_dispatch:  
 
 jobs:
   build-from-env-yml:
