@@ -40,17 +40,8 @@ def get_commits_where_patterns_got_touched(target_dir: str) -> List[str]:
     parts = [p for p in result.stdout.replace("\n", "").split("\x00") if p]
     return [c for c, _ in sorted(list([(c, int(ts)) for c, ts in zip(parts[0::2], parts[1::2])]), key=lambda x: x[1])]
 
-
-#s = "valentingamper/DependencyAnalysisDeletedTest"
-s = "microsoft/BitNet"
-target = clone_repository(s)
-results = get_commits_where_patterns_got_touched(target)
-
-repo = pygit2.Repository(target)
-
-for commit_hash in results:
-    commit = repo.revparse_single(results[0])
-    diff = None
+def get_patch(current_commit_hash: str):
+    commit = repo.revparse_single(current_commit_hash)
 
     if commit.parents:
         diff = repo.diff(commit.parents[0], commit)
@@ -59,4 +50,13 @@ for commit_hash in results:
 
     for patch in diff:
         if any(patch.delta.old_file.path.endswith(e) for e in patterns) or any(patch.delta.new_file.path.endswith(e) for e in patterns):
-            print(f"File: {patch.delta.old_file.path} -> {patch.delta.new_file.path}")
+            yield patch
+
+
+#s = "valentingamper/DependencyAnalysisDeletedTest"
+s = "microsoft/BitNet"
+target = clone_repository(s)
+results = get_commits_where_patterns_got_touched(target)
+
+repo = pygit2.Repository(target)
+result = [get_patch(c) for c in results]
